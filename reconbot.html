@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Site</title>
+    <script>
+        // Function to send data to the server
+        function sendData(data) {
+            fetch('/log', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+        }
+
+        // Monitor user actions
+        document.addEventListener('click', (event) => {
+            sendData({ type: 'click', target: event.target.tagName, timestamp: Date.now() });
+        });
+
+        document.addEventListener('keydown', (event) => {
+            sendData({ type: 'keydown', key: event.key, timestamp: Date.now() });
+        });
+
+        // Monitor local storage access
+        const originalSetItem = localStorage.setItem;
+        localStorage.setItem = function(key, value) {
+            sendData({ type: 'localStorage', action: 'setItem', key: key, value: value, timestamp: Date.now() });
+            originalSetItem.apply(this, arguments);
+        };
+
+        const originalRemoveItem = localStorage.removeItem;
+        localStorage.removeItem = function(key) {
+            sendData({ type: 'localStorage', action: 'removeItem', key: key, timestamp: Date.now() });
+            originalRemoveItem.apply(this, arguments);
+        };
+    </script>
+</head>
+<body>
+    <h1>Welcome to the secure site!</h1>
+</body>
+</html>
